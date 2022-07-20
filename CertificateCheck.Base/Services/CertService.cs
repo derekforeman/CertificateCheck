@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 
 namespace CertificateCheck.Base.Services
 {
@@ -42,7 +43,7 @@ namespace CertificateCheck.Base.Services
 			
 			try
 			{
-				var response = client.GetAsync(domain).Result;
+				var response = client.GetAsync(HttpUtility.UrlDecode(domain)).Result;
 				response.EnsureSuccessStatusCode();
 				string responseBody = response.Content.ReadAsStringAsync().Result;
 				return clientHandler.ClientCertificates[0];
@@ -56,7 +57,31 @@ namespace CertificateCheck.Base.Services
 			
 		}
 
+		public X509Certificate2 GetTest(string domain)
+        {
+			X509Certificate2? c = null;
+            var handler = new HttpClientHandler
+            {
+                UseDefaultCredentials = true,
 
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, error) =>
+                {
+
+					/// Access cert object.
+					c = new X509Certificate2(cert.GetRawCertData());
+					return true;
+                    
+                }
+            };
+
+            using (HttpClient client = new HttpClient(handler))
+            {
+                using (var response = client.GetAsync(HttpUtility.UrlDecode(domain)).Result)
+                {
+                }
+            }
+			return c ?? throw new NullReferenceException();
+        }
 		//private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateValidation()
 		//{
 		//	throw new NotImplementedException();
