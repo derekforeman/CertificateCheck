@@ -1,5 +1,5 @@
 ﻿using System;
- namespace CertificateCheck.Blazor.Models;
+ namespace CertificateCheck.Base.Models;
 
     public struct CertificateDetails
     {

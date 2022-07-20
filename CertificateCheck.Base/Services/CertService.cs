@@ -2,7 +2,7 @@
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace CertificateCheck.Blazor.Services
+namespace CertificateCheck.Base.Services
 {
 	public class CertService
 	{

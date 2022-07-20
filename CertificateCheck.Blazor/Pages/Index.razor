@@ -1,5 +1,8 @@
 ﻿@page "/"
 @using CertificateCheck.Blazor.Services
+@using CertificateCheck.Blazor.Models
+
+
 
 @inject CertService certService;
 
@@ -8,19 +11,64 @@
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+ Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@if (_certDetails == null)
+{
+    <p>Loading Details...</p>
+}
+else
+{
+    <div class="grid">
+        @foreach (var cert in _certDetails)
+        {
+
+            <div class="card-body" style="width: 18rem;">
+                <img src="@cert.Subject" class="="card-img-top/>
+                <div class="card-body">
+                    <h5 class="card-title">@cert.Issuer</h5>
+                    <h6 class="card-subtitle mb-3 texted-muted">
+                        <span class="oi oi-map-marker">
+                            <a href="@cert.RequestUrl">@cert.RequestUrl></a>
+                        </span>
+                    </h6>
+                    <div class="d-flex justify-content-between">
+                        <span>
+                            <span class="oi oi-clock mr-2">
+                                @cert.ExpirationDate
+                            </span>
+                            <span>
+                                <span class="oi oi-infinity mr-2">
+                                    @cert.EffectiveDate
+                                </span>
+                            </span>
+                        </span>
+                    </div>
+                </div>
+                }
+
+            </div>
+        }
+    </div>
+}
+
 
 @code{
 
-    
-    protected override async Task OnInitialized()
+    private IEnumerable<CertificateDetails>? _certDetails;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
         string[] sites =   {"https://flagpole.isf.io", "https://arm.ascendproject.com", "https://bloominsurance.com"};
+        _certDetails = new List<CertificateDetails>();
 
-
+        foreach (var s in sites)
+        {
+             //certService.Validate(s);
+            var a = certService.GetCertificateFromDomain(s);
+        }
+        this.StateHasChanged();
+        //return base.OnInitializedAsync();
     }
 
 }
