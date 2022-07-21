@@ -23,8 +23,8 @@ app.UseHttpsRedirection();
 
 app.MapGet("/certcheck/{domain}", (CertService certService, string domain) =>
 {
-    var deets =  certService.GetTest(domain);
-    return deets;
+    var certDeets =  certService.Validate2(domain);
+    return certDeets;
 }).WithTags("Get");
 
 app.MapGet("/certcheck/", ([FromBody] string[] domains) =>
@@ -32,6 +32,7 @@ app.MapGet("/certcheck/", ([FromBody] string[] domains) =>
 
 
 }).WithTags("Get");
+
 
 
 app.Run();

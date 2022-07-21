@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CertificateCheck.Base.Models;
+using System;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
@@ -57,39 +58,47 @@ namespace CertificateCheck.Base.Services
 			
 		}
 
-		public X509Certificate2 GetTest(string domain)
-        {
+		public CertificateDetails Validate2(string domain)
+		{
 			X509Certificate2? c = null;
-            var handler = new HttpClientHandler
-            {
-                UseDefaultCredentials = true,
+			var handler = new HttpClientHandler
+			{
+				UseDefaultCredentials = true,
 
-                ServerCertificateCustomValidationCallback = (sender, cert, chain, error) =>
-                {
+				ServerCertificateCustomValidationCallback = (sender, cert, chain, error) =>
+				{
 
 					/// Access cert object.
 					c = new X509Certificate2(cert.GetRawCertData());
 					return true;
-                    
-                }
-            };
+					
+				}
+			};
 
-            using (HttpClient client = new HttpClient(handler))
-            {
-                using (var response = client.GetAsync(HttpUtility.UrlDecode(domain)).Result)
-                {
-                }
-            }
-			return c ?? throw new NullReferenceException();
-        }
-		//private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ServerCertificateValidation()
-		//{
-		//	throw new NotImplementedException();
-		//}
+			using (HttpClient client = new HttpClient(handler))
+			{
+				using (var response = client.GetAsync(HttpUtility.UrlDecode(domain)).Result)
+				{
+				}
+			}
+
+			var cd = new CertificateDetails()
+			{
+				ExpirationDate = c.GetExpirationDateString(),
+				EffectiveDate = c.GetEffectiveDateString(),
+				Subject = c.Subject,
+				RequestUrl = HttpUtility.UrlDecode(domain)
+				
+			};
+			return cd;
+		}
+			
+		
 
 		private bool ServerCertificateValidation(HttpRequestMessage? requestMessage, X509Certificate2? x509Certificate2, X509Chain? x509Chain, SslPolicyErrors sslPolicyErrors)
 		{
-
+			requestMessage.Properties.Add("Certificate", x509Certificate2);
+			
 			x509Certificate2.GetEffectiveDateString();
 			x509Certificate2.GetExpirationDateString();
 			_ = x509Certificate2.Issuer;
